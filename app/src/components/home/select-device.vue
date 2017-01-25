@@ -1,33 +1,33 @@
-<style scoped>
+<style lang="stylus" scoped>
+  .label-text
+    margin-right 1rem
+    color rgba(0, 0, 0, 0.5)
+    font-size 1.2rem
+    font-weight bold
 
+  select
+    max-width 14rem
 </style>
 
-<template>
-  <div>
-    select device<br />
-    <select v-model="selected">
-      <option v-for="device of devices" value="device.deviceId">{{getDeviceDisplayName(device)}}</option>
-    </select>
-  </div>
+<template lang="pug">
+  div
+    label
+      span.label-text OUTPUT DEVICE
+      select(@change='onSelect')
+        option(v-for='device of devices', :value='device.deviceId') {{getDeviceDisplayName(device)}}
 </template>
 
 <script>
   import Logger from '../../services/logger.js'
-  import WebRTCService from '../../services/web-rtc.js'
 
   export default {
+    name: 'select-device',
+
     data () {
       return {
-        devices: null,
-        selected: null
+        devices: null
       }
     },
-
-    components: {
-
-    },
-
-    name: 'select-device',
 
     mounted () {
       window.navigator.mediaDevices.enumerateDevices()
@@ -35,31 +35,15 @@
           this.devices = deviceInfos.filter((deviceInfo) => deviceInfo.kind === 'audiooutput')
         })
         .catch(err => Logger.error(err))
-
-      this.webrtc = new WebRTCService()
-      this.webrtc.loopback()
-        .then((stream) => (this.localStream = stream))
     },
 
     methods: {
       getDeviceDisplayName (deviceInfo) {
         return deviceInfo.label
-      }
-    },
+      },
 
-    watch: {
-      selected (newValue) {
-        /* eslint-disable new-cap */
-        const context = new window.webkitAudioContext()
-        /* eslint-enable new-cap */
-        const oscillator = context.createOscillator()
-        const gain = context.createGain()
-
-        gain.gain.value = 0.01
-
-        oscillator.connect(gain)
-        gain.connect(context.destination)
-        oscillator.start(0)
+      onSelect (event) {
+        this.$emit('selection', event.target.value)
       }
     }
   }

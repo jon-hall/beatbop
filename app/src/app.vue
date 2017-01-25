@@ -5,9 +5,13 @@
     margin 0
     padding 0
 
+    &, *:before, *:after
+      box-sizing inherit
+
   html,body
     height 100%
     font-size 10px
+    box-sizing border-box
 
   body
     background radial-gradient(

@@ -5,10 +5,12 @@
     height 100%
 
     .header
-      padding 2rem 0
       display flex
       justify-content space-between
       align-items center
+
+      .app-title
+        font-size 7vmin
 
     .highlight
       color rgb(78, 168, 219)
@@ -17,26 +19,27 @@
 <template lang="pug">
   .home
     .header
-      h1 beat
+      h1.app-title beat
         span.highlight bop
       select-device(@selection='deviceSelected')
-    audio(ref='audio', controls)
-      source(src='https://archive.org/download/testmp3testfile/mpthreetest.mp3')
+    pad-bank
 </template>
 
 <script>
   import SelectDevice from './home/select-device.vue'
+  import PadBank from './home/pad-bank.vue'
 
   export default {
     name: 'home',
 
     components: {
+      PadBank,
       SelectDevice
     },
 
     methods: {
       deviceSelected (deviceId) {
-        this.$refs.audio.setSinkId(deviceId)
+        this.$store.dispatch('pads/setOutputDevice', { deviceId })
       }
     }
   }

@@ -1,17 +1,53 @@
 <style lang="stylus" scoped>
+  .pad-bank
+    padding 6vh
 
+    .pad-bank-inner
+      display inline-flex
+      flex-direction column
+      size = 75vh
+      height size
+      width size
+
+      .row
+        flex 1
+        display flex
 </style>
 
 <template lang="pug">
-  div
+  .pad-bank
+    .pad-bank-inner
+      .row(v-for="row in rows")
+        pad(v-for="pad in row.pads", :pad='pad')
 </template>
 
 <script>
+  import Pad from './pad.vue'
+
   export default {
     name: 'pad-bank',
 
-    components: {
+    computed: {
+      rows () {
+        const rows = []
+        const pads = this.pads.slice()
 
+        // Naive pad layout creates rows of 4 pads, sequentially
+        while (pads.length) {
+          rows.push(pads.splice(0, 4))
+        }
+
+        // Map to an array of objects, rather than just an array of arrays
+        return rows.map(row => ({ pads: row }))
+      },
+
+      pads () {
+        return this.$store.state.pads.items
+      }
+    },
+
+    components: {
+      Pad
     }
   }
 </script>

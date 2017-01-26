@@ -20,13 +20,19 @@
     @mousedown='onPadDown',
     @mouseup='onPadUp'
   )
-    audio(ref='audio')
+    audio(v-if='hasAudio', ref='audio')
       source(:src='sampleFile')
 </template>
 
 <script>
   export default {
     name: 'pad',
+
+    data () {
+      return {
+        hasAudio: true
+      }
+    },
 
     props: ['pad'],
 
@@ -70,18 +76,20 @@
         const audio = this.$refs.audio
 
         if (audio) {
+          // HACK: To get back to default, our easiest (safest?) option is to simply re-render the
+          // audio element - this allows robust recovery when setSinkId fails
+          if (!deviceId || deviceId === 'default') {
+            this.hasAudio = false
+            this.$nextTick(() => (this.hasAudio = true))
+            return
+          }
+
           audio.setSinkId(deviceId)
-            .catch((err) => {
-              console.log(`setSinkId failed (deviceId: ${deviceId}), restoring default sinkId...`, err)
-              // TODO: Several issues here -
-              //   * We should debounce, since this normally occurs as a batch of several failures,
-              //     but we only need to dispatch the action ONCE
-              //   * This can enter an infinite loop if default repeatedly fails - we should limit
-              //     the number of retries somehow (seems this retyr should be a separate, special,
-              //     action)
-              //   * We should display an error message to the user - again this should be its onPadDown
-              //     action specifically for trying to restore default after an error...
-              this.$store.dispatch('pads/setOutputDevice', { deviceId: 'default' })
+            .catch(() => {
+              // TODO: Inject logger service...
+              console.log(`Set sink id failed (id: ${deviceId})`)
+
+              this.$store.dispatch('pads/setOutputDeviceFailed', { pad: this.pad, deviceId })
             })
         }
       }

@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import Pad from '../../models/pad'
 import Sample from '../../models/sample'
 
@@ -25,7 +27,8 @@ const state = {
 const types = {
   ACTIVATE_PAD: 'ACTIVATE_PAD',
   DEACTIVATE_PAD: 'DEACTIVATE_PAD',
-  SET_OUTPUT_DEVICE: 'SET_OUTPUT_DEVICE'
+  SET_OUTPUT_DEVICE: 'SET_OUTPUT_DEVICE',
+  SET_OUTPUT_DEVICE_FAILED: 'SET_OUTPUT_DEVICE_FAILED'
 }
 
 // TODO: Proper pad mutations...
@@ -48,6 +51,17 @@ const mutations = {
 
       pad.sample.outputDevice = deviceId
     })
+  },
+
+  [types.SET_OUTPUT_DEVICE_FAILED] (state, { deviceId }) {
+    // Set all pads back to default output device (safest option)
+    state.items.forEach((pad) => {
+      if (!pad.sample) {
+        return
+      }
+
+      pad.sample.outputDevice = 'default'
+    })
   }
 }
 
@@ -62,7 +76,17 @@ const actions = {
 
   setOutputDevice ({ commit }, { deviceId }) {
     commit(types.SET_OUTPUT_DEVICE, { deviceId })
-  }
+  },
+
+  setOutputDeviceFailed: _.debounce(
+    function ({ commit }, { pad, deviceId }) {
+      // TODO: Inject logger service...
+      console.log('Running SET_OUTPUT_DEVICE_FAILED mutation...')
+      commit(types.SET_OUTPUT_DEVICE_FAILED, { pad, deviceId })
+    },
+    // Don't run for 500ms, while we gather other failures
+    500
+  )
 }
 
 export default {

@@ -17,14 +17,23 @@
   .pad(
     :title='file',
     :class='{ activated: padActivated }',
-    @mousedown='onPadDown',
-    @mouseup='onPadUp'
+    @mousedown='activatePad({ pad })',
+    @mouseup='deactivatePad({ pad })',
+    @dragenter.prevent='onDragEnter',
+    @dragover.prevent='onDragOver',
+    @dragend.prevent='onDragEnd',
+    @dragleave.prevent='onDragEnd',
+    @drop.prevent='onDrop'
   )
     audio(v-if='hasAudio', ref='audio')
       source(:src='sampleFile')
 </template>
 
 <script>
+  import { mapActions } from 'vuex'
+
+  import { mapTryGet } from '../../plugins/try-get'
+
   export default {
     name: 'pad',
 
@@ -37,26 +46,35 @@
     props: ['pad'],
 
     computed: {
-      padActivated () {
-        return this.pad && this.pad.activated
-      },
-
-      sampleFile () {
-        return this.pad && this.pad.sample && this.pad.sample.file
-      },
-
-      sampleDevice () {
-        return this.pad && this.pad.sample && this.pad.sample.outputDevice
-      }
+      ...mapTryGet({
+        padActivated: 'pad.activated',
+        sampleFile: 'pad.sample.file',
+        sampleDevice: 'pad.sample.outputDevice'
+      })
     },
 
     methods: {
-      onPadDown () {
-        this.$store.dispatch('pads/activatePad', { pad: this.pad })
+      ...mapActions('sampler', [
+        'activatePad',
+        'deactivatePad'
+      ]),
+
+      onDragEnter () {
+
       },
 
-      onPadUp () {
-        this.$store.dispatch('pads/deactivatePad', { pad: this.pad })
+      onDragOver (event) {
+        event.dataTransfer.dropEffect = 'copy'
+      },
+
+      onDragEnd () {
+
+      },
+
+      onDrop (event) {
+        // TODO: Dispatch the store and load file action - this persists it via electron AND loads it
+        // back in for use on this pad...
+        console.log(event.dataTransfer.files && event.dataTransfer.files[0])
       }
     },
 
@@ -89,7 +107,7 @@
               // TODO: Inject logger service...
               console.log(`Set sink id failed (id: ${deviceId})`)
 
-              this.$store.dispatch('pads/setOutputDeviceFailed', { pad: this.pad, deviceId })
+              this.$store.dispatch('sampler/setOutputDeviceFailed', { pad: this.pad, deviceId })
             })
         }
       }

@@ -39,7 +39,7 @@
 
     methods: {
       deviceSelected (deviceId) {
-        this.$store.dispatch('pads/setOutputDevice', { deviceId })
+        this.$store.dispatch('sampler/setOutputDevice', { deviceId })
       }
     }
   }

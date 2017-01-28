@@ -22,6 +22,8 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
+
   import Pad from './pad.vue'
 
   export default {
@@ -41,9 +43,7 @@
         return rows.map(row => ({ pads: row }))
       },
 
-      pads () {
-        return this.$store.state.pads.items
-      }
+      ...mapState('sampler', ['pads'])
     },
 
     components: {

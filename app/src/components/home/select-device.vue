@@ -22,6 +22,10 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
+
+  import { mapTryGet } from '../../plugins/try-get'
+
   import Logger from '../../services/logger.js'
 
   export default {
@@ -34,22 +38,20 @@
     },
 
     computed: {
-      selected () {
-        // HACK: This is grim - fixme plz!
-        return this.$store.state.pads &&
-          this.$store.state.pads.items &&
-          this.$store.state.pads.items[0] &&
-          this.$store.state.pads.items[0].sample &&
-          this.$store.state.pads.items[0].sample.outputDevice
-      }
+      ...mapState('sampler', ['pads']),
+      // HACK: This is grim - fixme plz! (only viable once we have per-pad output selection...)
+      ...mapTryGet({
+        selected: 'pads.items[0].sample.outputDevice'
+      })
     },
 
-    mounted () {
-      window.navigator.mediaDevices.enumerateDevices()
-        .then((deviceInfos) => {
-          this.devices = deviceInfos.filter((deviceInfo) => deviceInfo.kind === 'audiooutput')
-        })
-        .catch(err => Logger.error(err))
+    async mounted () {
+      try {
+        const deviceInfos = await window.navigator.mediaDevices.enumerateDevices()
+        this.devices = deviceInfos.filter((deviceInfo) => deviceInfo.kind === 'audiooutput')
+      } catch (ex) {
+        Logger.error(ex)
+      }
     },
 
     methods: {

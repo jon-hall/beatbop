@@ -2,6 +2,7 @@
   .pad
     margin 0.6rem
     flex 1
+    display flex
     background rgba(195, 195, 195, 1)
     cursor pointer
     border-radius 0.2rem
@@ -11,6 +12,21 @@
 
     &.activated
       background rgba(149, 203, 236, 1)
+
+    .pad-label
+      align-self flex-end
+      text-align center
+      width 100%
+      margin-bottom 0.5rem
+      padding 0.5rem 0.2rem
+      background rgba(255, 255, 245, 1)
+      border-top 1px solid rgba(50, 50,  50, 1)
+      border-bottom 1px solid rgba(50, 50,  50, 1)
+      border-radius 0.2rem
+      transform rotate(-1deg)
+      font-size 1.2rem
+      font-weight 600
+
 </style>
 
 <template lang="pug">
@@ -25,8 +41,9 @@
     @dragleave.prevent='onDragEnd',
     @drop.prevent='onDrop'
   )
+    span.pad-label(v-if='sampleTitle') {{sampleTitle}}
     audio(v-if='hasAudio', ref='audio')
-      source(:src='sampleFile')
+      source(:src='sampleSource')
 </template>
 
 <script>
@@ -48,15 +65,18 @@
     computed: {
       ...mapTryGet({
         padActivated: 'pad.activated',
-        sampleFile: 'pad.sample.file',
-        sampleDevice: 'pad.sample.outputDevice'
+        sampleSource: 'pad.sample.source',
+        sampleDevice: 'pad.sample.outputDevice',
+        sampleTitle: 'pad.sample.title',
+        sample: 'pad.sample'
       })
     },
 
     methods: {
       ...mapActions('sampler', [
         'activatePad',
-        'deactivatePad'
+        'deactivatePad',
+        'setSampleFromBlob'
       ]),
 
       onDragEnter () {
@@ -74,7 +94,26 @@
       onDrop (event) {
         // TODO: Dispatch the store and load file action - this persists it via electron AND loads it
         // back in for use on this pad...
-        console.log(event.dataTransfer.files && event.dataTransfer.files[0])
+        const file = event.dataTransfer.files && event.dataTransfer.files[0]
+
+        if (!file) {
+          return
+        }
+
+        const title = file.name // TODO: Get an actual title from user...
+        if (this.sample) {
+          this.setSampleFromBlob({
+            sample: this.sample,
+            title,
+            filename: file.name,
+            blob: file
+          })
+        }
+      },
+
+      recreateAudioNode () {
+        this.hasAudio = false
+        this.$nextTick(() => (this.hasAudio = true))
       }
     },
 
@@ -90,6 +129,11 @@
         }
       },
 
+      sampleSource () {
+        // When the source changes, we have to regenerate the audio element...
+        this.recreateAudioNode()
+      },
+
       sampleDevice (deviceId) {
         const audio = this.$refs.audio
 
@@ -97,8 +141,7 @@
           // HACK: To get back to default, our easiest (safest?) option is to simply re-render the
           // audio element - this allows robust recovery when setSinkId fails
           if (!deviceId || deviceId === 'default') {
-            this.hasAudio = false
-            this.$nextTick(() => (this.hasAudio = true))
+            this.recreateAudioNode()
             return
           }
 

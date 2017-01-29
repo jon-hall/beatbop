@@ -2,7 +2,7 @@ import types from './mutation-types'
 
 export default {
   [types.ACTIVATE_PAD] (state, { pad }) {
-    // TODO: Is it a bad practice not to bother looking up the sample in the state tree?
+    // TODO: Is it a bad practice not to bother looking up the pad in the state tree?
     pad.activated = true
   },
 
@@ -30,5 +30,10 @@ export default {
 
       pad.sample.outputDevice = 'default'
     })
+  },
+
+  [types.SET_SAMPLE_FROM_BLOB] (state, { sample, title, filename, blob }) {
+    // TODO: Is it a bad practice not to bother looking up the sample in the state tree?
+    sample.setSourceFromBlob({ title, filename, blob })
   }
 }

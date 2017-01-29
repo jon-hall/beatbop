@@ -23,5 +23,9 @@ export default {
     },
     // Don't run for 500ms, while we gather other failures
     500
-  )
+  ),
+
+  setSampleFromBlob ({ commit }, { sample, title, filename, blob }) {
+    commit(types.SET_SAMPLE_FROM_BLOB, { sample, title, filename, blob })
+  }
 }

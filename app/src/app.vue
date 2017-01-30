@@ -17,7 +17,7 @@
     background radial-gradient(
         ellipse at center,
         rgba(255, 255, 255, 1) 0%,
-        rgba(229, 229, 229, .85) 100%
+        rgba(240, 240, 240, .85) 100%
       )
     background-position center
     font-family Lato, Helvetica, sans-serif

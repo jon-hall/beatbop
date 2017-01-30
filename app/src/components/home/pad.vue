@@ -19,11 +19,7 @@
       width 100%
       margin-bottom 0.5rem
       padding 0.5rem 0.2rem
-      background rgba(255, 255, 245, 1)
-      border-top 1px solid rgba(50, 50,  50, 1)
-      border-bottom 1px solid rgba(50, 50,  50, 1)
-      border-radius 0.2rem
-      transform rotate(-1deg)
+      background rgba(255, 255, 245, 0.5)
       font-size 1.2rem
       font-weight 600
 
@@ -41,7 +37,13 @@
     @dragleave.prevent='onDragEnd',
     @drop.prevent='onDrop'
   )
-    span.pad-label(v-if='sampleTitle') {{sampleTitle}}
+    editable-content.pad-label(
+      v-if='sampleTitle',
+      content='sampleTitle',
+      :eventFilter='{ button: 2 }',
+      @click='onEditSampleTitle',
+      @onEditComplete='onSampleTitleChanged'
+    )
     audio(v-if='hasAudio', ref='audio')
       source(:src='sampleSource')
 </template>
@@ -51,12 +53,15 @@
 
   import { mapTryGet } from '../../plugins/try-get'
 
+  import EditableContent from '../widgets/editable-content.vue'
+
   export default {
     name: 'pad',
 
     data () {
       return {
-        hasAudio: true
+        hasAudio: true,
+        editingSampleTitle: false
       }
     },
 
@@ -70,6 +75,10 @@
         sampleTitle: 'pad.sample.title',
         sample: 'pad.sample'
       })
+    },
+
+    components: {
+      EditableContent
     },
 
     methods: {
@@ -114,6 +123,15 @@
       recreateAudioNode () {
         this.hasAudio = false
         this.$nextTick(() => (this.hasAudio = true))
+      },
+
+      onEditSampleTitle () {
+        console.log('editingsampletitle')
+        this.editingSampleTitle = true
+      },
+
+      onSampleTitleChanged (newValue) {
+        console.log('sampletitlechanged: ' + newValue)
       }
     },
 

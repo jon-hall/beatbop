@@ -1,8 +1,9 @@
-<style lang="stylus" scoped>
+<style lang="stylus">
   .pad
     margin 0.6rem
     flex 1
     display flex
+    flex-direction column
     background rgba(195, 195, 195, 1)
     cursor pointer
     border-radius 0.2rem
@@ -23,7 +24,8 @@
           background rgba(255, 255, 245, 0.8)
 
     .pad-label
-      align-self flex-end
+      margin-top auto
+      margin-bottom 0
       text-align center
       width 100%
       margin-bottom 0.5rem
@@ -32,6 +34,24 @@
       font-size 1.2rem
       font-weight 600
       -webkit-user-select none
+
+    .edit-buttons
+      opacity 1
+      transition all 0.3s ease-out
+      display flex
+      justify-content space-around
+      padding 0.5rem
+
+      i.fa
+        font-size 2vh
+
+      &.hidden
+        opacity 0
+
+      /*.edit-button*/
+
+
+        /*&.loop-button*/
 
 </style>
 
@@ -47,6 +67,15 @@
     @dragleave.prevent='onDragEnd',
     @drop.prevent='onDrop'
   )
+    .edit-buttons(:class='{ hidden: !editMode }')
+      icon-button.edit-button.loop-button(
+        icon='repeat',
+        title='Enable looping for sample',
+        toggle-title='Disable looping for sample',
+        :toggle='true',
+        :toggled='sampleRepeat',
+        @click='toggleSampleRepeat({ sample })'
+      )
     editable-content.pad-label(
       v-if='sampleTitle',
       content='sampleTitle',
@@ -54,7 +83,7 @@
       :eventFilter='{ button: 2 }',
       @onEditComplete='onSampleTitleChanged'
     )
-    audio(v-if='hasAudio', ref='audio')
+    audio(v-if='hasAudio', ref='audio', :loop='sampleRepeat')
       source(:src='sampleSource')
 </template>
 
@@ -64,6 +93,7 @@
   import { mapTryGet } from '../../plugins/try-get'
 
   import EditableContent from '../widgets/editable-content.vue'
+  import IconButton from '../widgets/icon-button.vue'
 
   export default {
     name: 'pad',
@@ -82,12 +112,14 @@
         sampleSource: 'pad.sample.source',
         sampleDevice: 'pad.sample.outputDevice',
         sampleTitle: 'pad.sample.title',
-        sample: 'pad.sample'
+        sample: 'pad.sample',
+        sampleRepeat: 'pad.sample.repeat'
       })
     },
 
     components: {
-      EditableContent
+      EditableContent,
+      IconButton
     },
 
     methods: {
@@ -95,7 +127,8 @@
         'activatePad',
         'deactivatePad',
         'setSampleFromBlob',
-        'setSampleTitle'
+        'setSampleTitle',
+        'toggleSampleRepeat'
       ]),
 
       tryActivatePad ({ pad }) {

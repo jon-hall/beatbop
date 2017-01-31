@@ -24,5 +24,7 @@ export default {
 
   setSampleFromBlob: passThroughAction(types.SET_SAMPLE_FROM_BLOB),
 
-  setSampleTitle: passThroughAction(types.SET_SAMPLE_TITLE)
+  setSampleTitle: passThroughAction(types.SET_SAMPLE_TITLE),
+
+  toggleSampleRepeat: passThroughAction(types.TOGGLE_SAMPLE_REPEAT)
 }

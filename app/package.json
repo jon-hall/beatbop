@@ -10,6 +10,8 @@
     "vue-router": "^2.0.0",
     "vuex": "^2.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "font-awesome": "^4.7.0"
+  },
   "author": "Jon Hall <jon_hall@outlook.com>"
 }

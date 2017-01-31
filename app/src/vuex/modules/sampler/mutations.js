@@ -40,5 +40,9 @@ export default {
   [types.SET_SAMPLE_TITLE] (state, { sample, title }) {
     // TODO: Is it a bad practice not to bother looking up the sample in the state tree?
     sample.title = title
+  },
+
+  [types.TOGGLE_SAMPLE_REPEAT] (state, { sample }) {
+    sample.repeat = !sample.repeat
   }
 }

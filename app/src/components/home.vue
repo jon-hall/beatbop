@@ -1,6 +1,7 @@
 <style lang="stylus" scoped>
+  @require '../styles/palette'
+
   .home
-    $highlight = rgb(78, 168, 219)
     padding 2rem
     flex 1
     height 100%

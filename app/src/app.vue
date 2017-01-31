@@ -39,6 +39,10 @@
 <script>
   import store from 'src/vuex/store'
 
+  // Make font-awesome available to the application
+  require('font-awesome/fonts/fontawesome-webfont.woff2')
+  require('font-awesome/css/font-awesome.css')
+
   export default {
     store
   }

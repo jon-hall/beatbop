@@ -61,9 +61,9 @@
     :class='{ activated: padActivated, editMode }',
     @mousedown='tryActivatePad({ pad })',
     @mouseup='tryDeactivatePad({ pad })',
-    @dragenter.prevent='onDragEnter',
+    @dragenter.prevent='suppressDragEvent',
     @dragover.prevent='onDragOver',
-    @dragend.prevent='onDragEnd',
+    @dragend.prevent='suppressDragEvent',
     @dragleave.prevent='onDragEnd',
     @drop.prevent='onDrop'
   )
@@ -83,8 +83,6 @@
       :eventFilter='{ button: 2 }',
       @onEditComplete='onSampleTitleChanged'
     )
-    audio(v-if='hasAudio', ref='audio', :loop='sampleRepeat')
-      source(:src='sampleSource')
 </template>
 
 <script>
@@ -98,23 +96,39 @@
   export default {
     name: 'pad',
 
-    data () {
-      return {
-        hasAudio: true
-      }
-    },
-
     props: ['pad', 'editMode'],
 
     computed: {
       ...mapTryGet({
         padActivated: 'pad.activated',
-        sampleSource: 'pad.sample.source',
-        sampleDevice: 'pad.sample.outputDevice',
-        sampleTitle: 'pad.sample.title',
         sample: 'pad.sample',
-        sampleRepeat: 'pad.sample.repeat'
-      })
+        sampleDevice: 'pad.sample.outputDevice',
+        sampleRepeat: 'pad.sample.repeat',
+        sampleSource: 'pad.sample.source',
+        sampleTitle: 'pad.sample.title'
+      }),
+
+      // Handle creation of the audio node with a computed - this way it'll automatically get
+      // rebuilt when any of its dependent properties change
+      audioNode () {
+        const audio = new Audio(this.sampleSource)
+        audio.loop = this.sampleRepeat
+
+        const deviceId = this.sampleDevice
+        if (deviceId && deviceId !== 'default') {
+          // If we're on a non-default output, try setting the sinkId now - dispatch the failure
+          // action if we fail to set it
+          audio.setSinkId(deviceId)
+            .catch(() => {
+              // TODO: Inject logger service...
+              console.log(`Set sink id failed (id: ${deviceId})`)
+
+              this.$store.dispatch('sampler/setOutputDeviceFailed', { pad: this.pad, deviceId })
+            })
+        }
+
+        return audio
+      }
     },
 
     components: {
@@ -149,16 +163,12 @@
         return this.deactivatePad({ pad })
       },
 
-      onDragEnter () {
-
+      suppressDragEvent () {
+        // Do nothing...
       },
 
       onDragOver (event) {
         event.dataTransfer.dropEffect = 'copy'
-      },
-
-      onDragEnd () {
-
       },
 
       onDrop (event) {
@@ -181,11 +191,6 @@
         }
       },
 
-      recreateAudioNode () {
-        this.hasAudio = false
-        this.$nextTick(() => (this.hasAudio = true))
-      },
-
       onSampleTitleChanged (title) {
         this.setSampleTitle({
           sample: this.sample,
@@ -196,39 +201,17 @@
 
     watch: {
       padActivated (activated) {
-        const audio = this.$refs.audio
+        const audio = this.audioNode
+
+        if (!audio) {
+          return
+        }
 
         if (activated) {
           audio.play()
         } else {
           audio.pause()
           audio.currentTime = 0
-        }
-      },
-
-      sampleSource () {
-        // When the source changes, we have to regenerate the audio element...
-        this.recreateAudioNode()
-      },
-
-      sampleDevice (deviceId) {
-        const audio = this.$refs.audio
-
-        if (audio) {
-          // HACK: To get back to default, our easiest (safest?) option is to simply re-render the
-          // audio element - this allows robust recovery when setSinkId fails
-          if (!deviceId || deviceId === 'default') {
-            this.recreateAudioNode()
-            return
-          }
-
-          audio.setSinkId(deviceId)
-            .catch(() => {
-              // TODO: Inject logger service...
-              console.log(`Set sink id failed (id: ${deviceId})`)
-
-              this.$store.dispatch('sampler/setOutputDeviceFailed', { pad: this.pad, deviceId })
-            })
         }
       }
     }

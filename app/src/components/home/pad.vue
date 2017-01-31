@@ -60,7 +60,6 @@
     :title='file',
     :class='{ activated: padActivated, editMode }',
     @mousedown='tryActivatePad({ pad })',
-    @mouseup='tryDeactivatePad({ pad })',
     @dragenter.prevent='suppressDragEvent',
     @dragover.prevent='onDragOver',
     @dragend.prevent='suppressDragEvent',
@@ -151,16 +150,18 @@
           return
         }
 
-        return this.activatePad({ pad })
-      },
+        // Attach a mouseup listener on window so we don't get stuck 'down' if the user moves their
+        // cursor off the pad before releasing
+        const mouseupHandler = () => {
+          // Cleanup our window-level event listener (and local handler cache)
+          window.removeEventListener('mouseup', mouseupHandler)
 
-      tryDeactivatePad ({ pad }) {
-        if (this.editMode) {
-          // Do nothing in edit mode
-          return
+          // Deactivate this pad
+          this.deactivatePad({ pad })
         }
+        window.addEventListener('mouseup', mouseupHandler)
 
-        return this.deactivatePad({ pad })
+        return this.activatePad({ pad })
       },
 
       suppressDragEvent () {

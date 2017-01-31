@@ -16,6 +16,12 @@
     &.editMode:hover
       background rgba(197, 217, 230, 1)
 
+      .pad-label
+        -webkit-user-select default
+
+        &:hover
+          background rgba(255, 255, 245, 0.8)
+
     .pad-label
       align-self flex-end
       text-align center
@@ -25,6 +31,7 @@
       background rgba(255, 255, 245, 0.5)
       font-size 1.2rem
       font-weight 600
+      -webkit-user-select none
 
 </style>
 
@@ -87,7 +94,8 @@
       ...mapActions('sampler', [
         'activatePad',
         'deactivatePad',
-        'setSampleFromBlob'
+        'setSampleFromBlob',
+        'setSampleTitle'
       ]),
 
       tryActivatePad ({ pad }) {
@@ -145,9 +153,11 @@
         this.$nextTick(() => (this.hasAudio = true))
       },
 
-      onSampleTitleChanged (newValue) {
-        // TODO: Dispatch action, to commit mutation, to update title in store...
-        console.log('sampletitlechanged: ' + newValue)
+      onSampleTitleChanged (title) {
+        this.setSampleTitle({
+          sample: this.sample,
+          title
+        })
       }
     },
 

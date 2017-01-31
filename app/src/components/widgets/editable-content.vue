@@ -80,6 +80,15 @@ export default {
       // Fir ean event to let consumers know the data has updated
       this.$emit('onEditComplete', this.$refs.contentElement.textContent)
     }
+  },
+
+  watch: {
+    enabled (isEnabled) {
+      // If we get disabled, make sure we stop editing
+      if (this.editing && !isEnabled) {
+        this.endEditing()
+      }
+    }
   }
 }
 </script>

@@ -13,6 +13,9 @@
     &.activated
       background rgba(149, 203, 236, 1)
 
+    &.editMode:hover
+      background rgba(197, 217, 230, 1)
+
     .pad-label
       align-self flex-end
       text-align center
@@ -28,9 +31,9 @@
 <template lang="pug">
   .pad(
     :title='file',
-    :class='{ activated: padActivated }',
-    @mousedown='activatePad({ pad })',
-    @mouseup='deactivatePad({ pad })',
+    :class='{ activated: padActivated, editMode }',
+    @mousedown='tryActivatePad({ pad })',
+    @mouseup='tryDeactivatePad({ pad })',
     @dragenter.prevent='onDragEnter',
     @dragover.prevent='onDragOver',
     @dragend.prevent='onDragEnd',
@@ -40,8 +43,8 @@
     editable-content.pad-label(
       v-if='sampleTitle',
       content='sampleTitle',
+      :enabled='editMode',
       :eventFilter='{ button: 2 }',
-      @click='onEditSampleTitle',
       @onEditComplete='onSampleTitleChanged'
     )
     audio(v-if='hasAudio', ref='audio')
@@ -60,12 +63,11 @@
 
     data () {
       return {
-        hasAudio: true,
-        editingSampleTitle: false
+        hasAudio: true
       }
     },
 
-    props: ['pad'],
+    props: ['pad', 'editMode'],
 
     computed: {
       ...mapTryGet({
@@ -87,6 +89,24 @@
         'deactivatePad',
         'setSampleFromBlob'
       ]),
+
+      tryActivatePad ({ pad }) {
+        if (this.editMode) {
+          // Do nothing in edit mode
+          return
+        }
+
+        return this.activatePad({ pad })
+      },
+
+      tryDeactivatePad ({ pad }) {
+        if (this.editMode) {
+          // Do nothing in edit mode
+          return
+        }
+
+        return this.deactivatePad({ pad })
+      },
 
       onDragEnter () {
 
@@ -125,12 +145,8 @@
         this.$nextTick(() => (this.hasAudio = true))
       },
 
-      onEditSampleTitle () {
-        console.log('editingsampletitle')
-        this.editingSampleTitle = true
-      },
-
       onSampleTitleChanged (newValue) {
+        // TODO: Dispatch action, to commit mutation, to update title in store...
         console.log('sampletitlechanged: ' + newValue)
       }
     },

@@ -3,6 +3,8 @@
 </style>
 
 <script>
+const KEYCODE_NEWLINE = ('\n').charCodeAt(0)
+
 export default {
   data () {
     return {
@@ -19,8 +21,8 @@ export default {
       default: null
     },
 
-    eventFilter: {
-      default: null
+    enabled: {
+      default: false
     }
   },
 
@@ -38,28 +40,36 @@ export default {
         },
 
         on: {
-          click: this.onClick,
-          contextmenu: this.onClick,
-          blur: this.onBlur
+          // Use mousedown so we can enable contenteditable and focus the editor in a single click
+          mousedown: this.onMousedown,
+          // Use keypress, since keydown fires repeatedly for holding modifiers etc.
+          keypress: this.onKeypress,
+          blur: this.endEditing
         }
       }
     )
   },
 
   methods: {
-    onClick (event) {
-      const filters = this.eventFilter || {}
-      const startEditing = Object.keys(filters)
-          .every(filterProperty => event[filterProperty] === filters[filterProperty])
-
-      if (startEditing) {
-        this.editing = true
-
-        // TODO: Focus the editable content on next tick...?
+    onMousedown (event) {
+      if (this.editing || !this.enabled) {
+        return
       }
+
+      this.editing = true
     },
 
-    onBlur () {
+    onKeypress (event) {
+      if (!this.editing || event.which !== KEYCODE_NEWLINE || !event.ctrlKey) {
+        // Bail when not editing/key wasn't enter/ctrl isn't being held
+        return
+      }
+
+      // End editing when enter is hit
+      this.endEditing()
+    },
+
+    endEditing () {
       if (!this.editing) {
         // Nothing to do if we weren't editing
         return

@@ -18,7 +18,7 @@
   .pad-bank
     .pad-bank-inner
       .row(v-for="row in rows")
-        pad(v-for="pad in row.pads", :pad='pad')
+        pad(v-for="pad in row.pads", :pad='pad', :edit-mode='editMode')
 </template>
 
 <script>
@@ -28,6 +28,12 @@
 
   export default {
     name: 'pad-bank',
+
+    props: {
+      editMode: {
+        default: false
+      }
+    },
 
     computed: {
       rows () {

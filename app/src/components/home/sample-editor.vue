@@ -1,9 +1,10 @@
 <style lang="stylus" scoped>
   .sample-editor
-    background rgba(250, 250, 250, 1)
+    position relative
     padding 1rem
     display flex
     flex-direction column
+    background rgba(250, 250, 250, 1)
     box-shadow 0 0 0.3rem rgba(0, 0, 0, 0.7)
 
     .sample-editor-title
@@ -14,6 +15,15 @@
       color rgba(150, 150, 150, 1)
       padding-bottom 1rem
 
+    .close-button
+      position absolute
+      top 0.5rem
+      right 1rem
+      font-size 2.2rem
+
+      &:not(:hover)
+        color rgba(150, 150, 150, 1)
+
     .sample-visualizer
       width 100vh
       height 40vh
@@ -23,11 +33,20 @@
   .sample-editor
     .sample-editor-title SAMPLE EDITOR
     .sample-editor-subtitle {{sample.title}}
+    icon-button.close-button(
+      icon='times',
+      title='Close sample editor',
+      @click='setEditingSample({ sample: null })'
+    )
     canvas.sample-visualizer(ref='visualizer')
 </template>
 
 <script>
+  import { mapActions } from 'vuex'
+
   import { mapTryGet } from '../../plugins/try-get'
+
+  import IconButton from '../widgets/icon-button.vue'
 
   export default {
     name: 'sample-editor',
@@ -44,7 +63,15 @@
       })
     },
 
+    components: {
+      IconButton
+    },
+
     methods: {
+      ...mapActions('sample-editor', [
+        'setEditingSample'
+      ]),
+
       drawWaveform (source) {
         const audioCtx = new AudioContext()
 

@@ -82,7 +82,7 @@
       )
     editable-content.pad-label(
       v-if='sampleTitle',
-      content='sampleTitle',
+      :content='sampleTitle',
       :enabled='editMode',
       :eventFilter='{ button: 2 }',
       @onEditComplete='onSampleTitleChanged'

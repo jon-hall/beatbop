@@ -75,6 +75,11 @@
         :toggled='sampleRepeat',
         @click='toggleSampleRepeat({ sample })'
       )
+      icon-button.edit-button.sample-edit-button(
+        icon='cog',
+        title='Edit this sample',
+        @click='setEditingSample({ sample })'
+      )
     editable-content.pad-label(
       v-if='sampleTitle',
       content='sampleTitle',
@@ -142,6 +147,10 @@
         'setSampleFromBlob',
         'setSampleTitle',
         'toggleSampleRepeat'
+      ]),
+
+      ...mapActions('sample-editor', [
+        'setEditingSample'
       ]),
 
       tryActivatePad ({ pad }) {

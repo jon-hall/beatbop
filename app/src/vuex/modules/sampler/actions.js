@@ -1,14 +1,7 @@
 import _ from 'lodash'
 
 import types from './mutation-types'
-
-// Helper for the common case of a simple 'pass-through' action which commits a mutation with the
-// supplied args
-function passThroughAction (type) {
-  return function ({ commit }, ...args) {
-    commit(type, ...args)
-  }
-}
+import { passThroughAction } from '../../../utils/vuex'
 
 export default {
   activatePad: passThroughAction(types.ACTIVATE_PAD),

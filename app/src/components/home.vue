@@ -36,12 +36,24 @@
 
     .highlight
       color $highlight
+
+    .sample-editor-wrapper
+      position absolute
+      top 0
+      left 0
+      bottom 0
+      right 0
+      display flex
+      align-items center
+      justify-content center
 </style>
 
 <template lang="pug">
   .home
     .editing-overlay
       .editing-overlay-inner(:class='{ hidden: !editMode }') EDIT MODE
+    .sample-editor-wrapper(v-if='editingSample')
+      sample-editor(:sample='editingSample')
     .header
       h1.app-title beat
         span.highlight bop
@@ -50,8 +62,11 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
+
   import SelectDevice from './home/select-device.vue'
   import PadBank from './home/pad-bank.vue'
+  import SampleEditor from './home/sample-editor.vue'
 
   const KEYCODE_E_WITH_CTRL = 5
 
@@ -65,8 +80,15 @@
       }
     },
 
+    computed: {
+      ...mapState('sample-editor', {
+        editingSample: 'sample'
+      })
+    },
+
     components: {
       PadBank,
+      SampleEditor,
       SelectDevice
     },
 

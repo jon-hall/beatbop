@@ -17,12 +17,12 @@ export default class AudioRecorder {
     audioNode
   }) {
     const dest = audioContext.createMediaStreamDestination()
-    const mediaRecorder = new MediaRecorder(dest.stream)
+    const mediaRecorder = new window.MediaRecorder(dest.stream)
     audioNode.connect(dest)
 
     const chunks = []
     mediaRecorder.ondataavailable = function (evt) {
-     chunks.push(evt.data)
+      chunks.push(evt.data)
     }
 
     mediaRecorder.start()
@@ -31,8 +31,8 @@ export default class AudioRecorder {
       filename
     }) {
       mediaRecorder.onstop = function () {
-       var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' })
-       download(filename + '.ogg', URL.createObjectURL(blob))
+        var blob = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus' })
+        download(filename + '.ogg', URL.createObjectURL(blob))
       }
 
       mediaRecorder.stop()

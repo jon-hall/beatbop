@@ -63,7 +63,7 @@
     @dragenter.prevent='suppressDragEvent',
     @dragover.prevent='onDragOver',
     @dragend.prevent='suppressDragEvent',
-    @dragleave.prevent='onDragEnd',
+    @dragleave.prevent='suppressDragEvent',
     @drop.prevent='onDrop'
   )
     .edit-buttons(:class='{ hidden: !editMode }')

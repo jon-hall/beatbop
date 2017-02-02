@@ -4,6 +4,7 @@
     color rgba(0, 0, 0, 0.5)
     font-size 1.2rem
     font-weight bold
+    -webkit-user-select none
 
   select
     max-width 14rem

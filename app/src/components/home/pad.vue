@@ -35,24 +35,27 @@
       font-weight 600
       -webkit-user-select none
 
-    .edit-buttons
+    .edit-icon-wrapper
       opacity 1
       transition all 0.3s ease-out
       display flex
-      justify-content space-around
+      justify-content center
+      align-items center
+      width 100%
+      height 100%
       padding 0.5rem
-
-      i.fa
-        font-size 2vh
 
       &.hidden
         opacity 0
 
-      /*.edit-button*/
+      .edit-icon
+        font-size 7vh
+        color rgba(40, 160, 250, 1)
+        opacity 0.2
 
-
-        /*&.loop-button*/
-
+      &:hover
+        .edit-icon
+          opacity 0.4
 </style>
 
 <template lang="pug">
@@ -66,20 +69,8 @@
     @dragleave.prevent='suppressDragEvent',
     @drop.prevent='onDrop'
   )
-    .edit-buttons(:class='{ hidden: !editMode }')
-      icon-button.edit-button.loop-button(
-        icon='repeat',
-        title='Enable looping for sample',
-        toggle-title='Disable looping for sample',
-        :toggle='true',
-        :toggled='sampleRepeat',
-        @click='toggleSampleRepeat({ sample })'
-      )
-      icon-button.edit-button.sample-edit-button(
-        icon='cog',
-        title='Edit this sample',
-        @click='setEditingSample({ sample })'
-      )
+    .edit-icon-wrapper(:class='{hidden: !editMode}',title='Edit this sample')
+      i.edit-icon(class='fa fa-cog')
     editable-content.pad-label(
       v-if='sampleTitle',
       :content='sampleTitle',
@@ -145,8 +136,7 @@
         'activatePad',
         'deactivatePad',
         'setSampleFromBlob',
-        'setSampleTitle',
-        'toggleSampleRepeat'
+        'setSampleTitle'
       ]),
 
       ...mapActions('sample-editor', [
@@ -155,7 +145,8 @@
 
       tryActivatePad ({ pad }) {
         if (this.editMode) {
-          // Do nothing in edit mode
+          // Open sample editor for this pad in edit mode
+          this.setEditingSample({ sample: pad.sample })
           return
         }
 

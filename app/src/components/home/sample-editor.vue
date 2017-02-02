@@ -24,6 +24,20 @@
       &:not(:hover)
         color rgba(150, 150, 150, 1)
 
+    .editor-controls
+      margin 1rem
+      margin-bottom 1.5rem
+      display flex
+      flex-direction column
+      align-items flex-end
+
+      .editor-control-group
+        .editor-button
+          font-size 2.2rem
+
+          &.toggled
+            background rgba(150, 180, 255, 0.3)
+
     .sample-visualizer
       width 100vh
       height 40vh
@@ -38,6 +52,16 @@
       title='Close sample editor',
       @click='setEditingSample({ sample: null })'
     )
+    .editor-controls
+      .editor-control-group
+        icon-button.editor-button.loop-button(
+          icon='repeat',
+          title='Enable looping for sample',
+          toggle-title='Disable looping for sample',
+          :toggle='true',
+          :toggled='repeat',
+          @click='toggleSampleRepeat({ sample })'
+        )
     canvas.sample-visualizer(ref='visualizer')
 </template>
 
@@ -59,7 +83,8 @@
 
     computed: {
       ...mapTryGet({
-        source: 'sample.source'
+        source: 'sample.source',
+        repeat: 'sample.repeat'
       })
     },
 
@@ -68,6 +93,10 @@
     },
 
     methods: {
+      ...mapActions('sampler', [
+        'toggleSampleRepeat'
+      ]),
+
       ...mapActions('sample-editor', [
         'setEditingSample'
       ]),

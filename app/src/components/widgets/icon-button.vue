@@ -7,7 +7,7 @@
     outline none
     color $highlight
     cursor pointer
-    padding 0.4rem
+    padding 0.6rem 0.8rem 0.2rem 0.8rem
     border-radius 0.2rem
 
     &:hover

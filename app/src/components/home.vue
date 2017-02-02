@@ -32,6 +32,7 @@
       align-items center
 
       .app-title
+        -webkit-user-select none
         font-size 7vmin
 
     .highlight
@@ -52,13 +53,13 @@
   .home
     .editing-overlay
       .editing-overlay-inner(:class='{ hidden: !editMode }') EDIT MODE
-    .sample-editor-wrapper(v-if='editingSample')
-      sample-editor(:sample='editingSample')
     .header
       h1.app-title beat
         span.highlight bop
       select-device(@selection='deviceSelected')
     pad-bank(:edit-mode="editMode")
+    .sample-editor-wrapper(v-if='editingSample')
+      sample-editor(:sample='editingSample')
 </template>
 
 <script>

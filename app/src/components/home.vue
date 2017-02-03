@@ -15,16 +15,17 @@
       justify-content center
 
       .editing-overlay-inner
-        padding 0.5rem 12rem
+        padding 1vmin 12vmin
         text-align center
         background rgba(0, 0, 0, 0.2)
         color $highlight
-        font-size 2rem
+        font-size 3vmin
         transition all 0.3s ease-out
-        opacity 1
+        opacity 0.3
+        cursor pointer
 
-        &.hidden
-          opacity 0
+        &.enabled
+          opacity 1
 
     .header
       display flex
@@ -52,7 +53,7 @@
 <template lang="pug">
   .home
     .editing-overlay
-      .editing-overlay-inner(:class='{ hidden: !editMode }') EDIT MODE
+      .editing-overlay-inner(:class='{ enabled: editMode }',@click="toggleEditMode") EDIT MODE
     .header
       h1.app-title beat
         span.highlight bop
@@ -67,7 +68,7 @@
 
   import SelectDevice from './home/select-device.vue'
   import PadBank from './home/pad-bank.vue'
-  import SampleEditor from './home/sample-editor.vue'
+  import SampleEditor from './home/sample-editor/index.vue'
 
   const KEYCODE_E_WITH_CTRL = 5
 
@@ -104,6 +105,10 @@
           return
         }
 
+        this.toggleEditMode()
+      },
+
+      toggleEditMode () {
         this.editMode = !this.editMode
       },
 

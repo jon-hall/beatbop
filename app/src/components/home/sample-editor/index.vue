@@ -41,6 +41,7 @@
     .sample-visualizer
       width 100vh
       height 40vh
+      overflow auto
 </style>
 
 <template lang="pug">
@@ -62,7 +63,8 @@
           :toggled='repeat',
           @click='toggleSampleRepeat({ sample })'
         )
-    waveform-viewer.sample-visualizer(:sample='sample')
+    .sample-visualizer
+      waveform-viewer(:sample='sample')
 </template>
 
 <script>

@@ -1,12 +1,15 @@
 <style lang="stylus" scoped>
-  /*.waveform-viewer
-    */
+  .waveform-viewer
+    height calc(100% - 20px)
+    width 100%
 </style>
 
 <template lang="pug">
   svg.waveform-viewer(
+    :style='{ width: zoom + "%" }',
     :viewBox='"0 " + viewBoxTop + " 100 " + viewBoxHeight',
-    preserveAspectRatio='none'
+    preserveAspectRatio='none',
+    @wheel='onMousewheel'
   )
     g
       line(
@@ -32,15 +35,18 @@
       return {
         waveform: [],
         audioData: null,
-        pointsToShow: null,
         viewBoxTop: 0,
-        viewBoxHeight: 100
+        viewBoxHeight: 100,
+        zoom: 100
       }
     },
 
     props: {
       sample: {
         default: null
+      },
+      normalize: {
+        default: false
       }
     },
 
@@ -59,23 +65,16 @@
         const arrayBuffer = await response.arrayBuffer()
         const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
 
-        return {
-          // PERF: Put (potentially large) typed array on '_'-prefixed child property -
-          // supposedly vue doesn't add observers to it then (TODO: Is this actually true, and
-          // does it skip typed arrays anyway?)
-          _data: audioBuffer.getChannelData(0)
-        }
+        return audioBuffer.getChannelData(0)
       },
 
       // PERF: Since this method is pretty perf-critical for rendering, it is all done inline,
       // rather than being refactored to smaller methods as would normally be the case
       redrawWaveform: _.debounce(function () {
-        const audioData = this.audioData && this.audioData._data
-        // TODO: Is it even worth making this (pointsToShow) configurable? If not then remove this!
-        const pointsToShow = this.pointsToShow ||
-          // Default number of lines based on initial element width (4x seems to give a decent-
-          // looking waveform)
-          (this.pointsToShow = this.$el.getClientRects()[0].width * 4)
+        const audioData = this.audioData && this.audioData
+        // Set number of lines based on element width (4x seems to give a decent-looking waveform)
+        // We also negatively adjust for zoom so the # of elements doesn't get crazy
+        const pointsToShow = Math.floor(this.$el.getClientRects()[0].width * 4 / (0.5 * (this.zoom / 200)))
 
         if (!audioData || !audioData.length) {
           this.waveform = []
@@ -86,6 +85,7 @@
         const length = audioData.length
         const nth = Math.floor(length / pointsToShow)
         const width = 100 / pointsToShow
+        const normalize = this.normalize
         let minY = 0
         let maxY = 0
 
@@ -102,14 +102,20 @@
           // Set an x position based around the mid-line (50)
           const y = 50 + yExtent
 
-          // Track min/max y - so we can scale viewbox if needed
-          minY = minY < yExtent ? minY : yExtent
-          maxY = maxY > yExtent ? maxY : yExtent
+          if (normalize) {
+            // Track min/max y - so we can scale viewbox if needed
+            minY = minY < yExtent ? minY : yExtent
+            maxY = maxY > yExtent ? maxY : yExtent
+          }
 
           waveform[i] = { x, y, width }
         }
         // Update our (tracked) property
         this.waveform = waveform
+
+        if (!normalize) {
+          return
+        }
 
         // Scale our viewBox as needed (so our max amplitude is at ~90% height)
         const limit = Math.max(Math.abs(minY), Math.abs(maxY)) * 1.1
@@ -117,7 +123,31 @@
         this.viewBoxTop = 50 - limit
         // NOTE: This has to be a LEADING debounce to get the desired effect of preventing repeated
         // calls when multiple watchers fire together
-      }, 100, { leading: true, trailing: false })
+      }, 100, { leading: true, trailing: false }),
+
+      onMousewheel (event) {
+        const delta = event.wheelDelta
+
+        // Ignore legitimate sideways scrolling
+        if (event.shiftKey) {
+          return
+        }
+
+        if (delta < 0) {
+          // Zoom out
+          this.zoom *= 0.9
+        } else {
+          this.zoom *= 1.1
+        }
+
+        // TODO: We should adjust the current scrollLeft to keep the viewport centred on the current
+        // mouse position - only implement if reasonably easy, since this isn't a permanent zooming
+        // solution anyway...
+
+        // Prevent scrolling while zooming
+        event.preventDefault()
+        return false
+      }
     },
 
     watch: {
@@ -127,6 +157,8 @@
       source: {
         immediate: true,
         async handler (source) {
+          // NOTE: Even though we set a (potentially very large) typed array as a data value, it
+          // seems vue skips any attempt to observe it, so shouldn't cause perf/memory usage issues
           this.audioData = await this.reloadAudioData(source)
         }
       },
@@ -137,7 +169,7 @@
         this.redrawWaveform()
       },
 
-      pointsToShow () {
+      zoom () {
         this.redrawWaveform()
       }
     }

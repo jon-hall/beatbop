@@ -34,6 +34,7 @@
       .editor-control-group
         .editor-button
           font-size 2.2rem
+          margin 0 0.5rem
 
           &.toggled
             background rgba(150, 180, 255, 0.3)
@@ -55,6 +56,14 @@
     )
     .editor-controls
       .editor-control-group
+        icon-button.editor-button.toggle-button(
+          icon='hand-o-down',
+          title='Enable toggle (press to start, press to stop) for sample',
+          toggle-title='Disable toggle (press to start, press to stop) for sample',
+          :toggle='true',
+          :toggled='toggle',
+          @click='toggleSampleToggle({ sample })'
+        )
         icon-button.editor-button.loop-button(
           icon='repeat',
           title='Enable looping for sample',
@@ -87,7 +96,8 @@
     computed: {
       ...mapTryGet({
         source: 'sample.source',
-        repeat: 'sample.repeat'
+        repeat: 'sample.repeat',
+        toggle: 'sample.toggle'
       })
     },
 
@@ -98,7 +108,8 @@
 
     methods: {
       ...mapActions('sampler', [
-        'toggleSampleRepeat'
+        'toggleSampleRepeat',
+        'toggleSampleToggle'
       ]),
 
       ...mapActions('sample-editor', [

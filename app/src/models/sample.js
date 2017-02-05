@@ -5,13 +5,15 @@ export default class Sample {
     title = 'Sine Wave',
     source = 'https://www.freesound.org/data/previews/8/8803_2518-lq.mp3',
     outputDevice,
-    repeat = false
+    repeat = false,
+    toggle = false
   } = {}) {
     this.filename =
     this.title = title
     this.source = source
     this.outputDevice = outputDevice
     this.repeat = repeat
+    this.toggle = toggle
   }
 
   setSourceFromBlob ({

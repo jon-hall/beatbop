@@ -44,5 +44,9 @@ export default {
 
   [types.TOGGLE_SAMPLE_REPEAT] (state, { sample }) {
     sample.repeat = !sample.repeat
+  },
+
+  [types.TOGGLE_SAMPLE_TOGGLE] (state, { sample }) {
+    sample.toggle = !sample.toggle
   }
 }

@@ -19,5 +19,7 @@ export default {
 
   setSampleTitle: passThroughAction(types.SET_SAMPLE_TITLE),
 
-  toggleSampleRepeat: passThroughAction(types.TOGGLE_SAMPLE_REPEAT)
+  toggleSampleRepeat: passThroughAction(types.TOGGLE_SAMPLE_REPEAT),
+
+  toggleSampleToggle: passThroughAction(types.TOGGLE_SAMPLE_TOGGLE)
 }

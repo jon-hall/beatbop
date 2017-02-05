@@ -100,7 +100,8 @@
         sampleDevice: 'pad.sample.outputDevice',
         sampleRepeat: 'pad.sample.repeat',
         sampleSource: 'pad.sample.source',
-        sampleTitle: 'pad.sample.title'
+        sampleTitle: 'pad.sample.title',
+        sampleToggle: 'pad.sample.toggle'
       }),
 
       // Handle creation of the audio node with a computed - this way it'll automatically get
@@ -150,6 +151,19 @@
           return
         }
 
+        // TODO: It inherently feels this toggle/non-toggle handling belongs elsewhere...
+        // If we're toggling, and activated, then deactivate and bail
+        if (this.sampleToggle && this.padActivated) {
+          return this.deactivatePad({ pad })
+        }
+
+        this.activatePad({ pad })
+
+        if (this.sampleToggle) {
+          // If we're toggling, then bail before starting to deal with mouseup event
+          return
+        }
+
         // Attach a mouseup listener on window so we don't get stuck 'down' if the user moves their
         // cursor off the pad before releasing
         const mouseupHandler = () => {
@@ -159,9 +173,8 @@
           // Deactivate this pad
           this.deactivatePad({ pad })
         }
-        window.addEventListener('mouseup', mouseupHandler)
 
-        return this.activatePad({ pad })
+        window.addEventListener('mouseup', mouseupHandler)
       },
 
       suppressDragEvent () {

@@ -16,6 +16,7 @@
     "pack": "cross-env NODE_ENV=production webpack -p --progress --colors",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
+    "dev:unit": "cross-env DEV=true node_modules/.bin/karma start test/unit/karma.conf.js",
     "vue:route": "node tasks/vue/route.js",
     "vuex:module": "node tasks/vuex/module.js",
     "postinstall": "npm run lint:fix && cd app && npm install"

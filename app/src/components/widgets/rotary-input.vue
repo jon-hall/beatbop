@@ -3,24 +3,82 @@
 </style>
 
 <template lang="pug">
-  .rotary-input(@mousemove='onMousemove') TODO - UI HERE
+  .rotary-input(@mousedown='onMousedown') TODO - UI HERE
 </template>
 
 <script>
 export default {
+  name: 'rotary-input',
+
+  data () {
+    return {
+      internalValue: this.value
+    }
+  },
+
   props: {
-    min: {
+    minValue: {
       default: 0
     },
 
-    max: {
+    maxValue: {
       default: 1
+    },
+
+    minRotation: {
+      default: -120
+    },
+
+    maxRotation: {
+      default: 120
+    },
+
+    value: {
+      default: 0.5
+    },
+
+    sensitivity: {
+      // 400px of vertical movement equates to a full range change (e.g. from center, dragging
+      // 200px up or down gets you the max or min value, respectively)
+      default: 400
+    }
+  },
+
+  computed: {
+    valueRange () {
+      return this.maxValue - this.minValue
     }
   },
 
   methods: {
-    onMousemove () {
-      this.$emit('change')
+    onMousedown () {
+      // Add a handler which calls our onMousemove event, in the correct context, but against window,
+      // so we can track movements outside of this element (or even the window, while the user drags)
+      const onMousemove = (event) => this.onMousemove(event)
+      window.addEventListener('mousemove', onMousemove)
+
+      // Also add a listener for mouse up, so we stop tracking movement events when user releases
+      const onMouseup = () => {
+        // Remove both the mousemove listener, and this listener
+        window.removeEventListener('mousemove', onMousemove)
+        window.removeEventListener('mouseup', onMouseup)
+      }
+      window.addEventListener('mouseup', onMouseup)
+    },
+
+    onMousemove (event) {
+      // TODO: PERF
+      // if(this.internalValue !== this.minValue && this.internalValue !== this.maxValue) {
+      this.internalValue += this.valueRange * (-event.movementY / this.sensitivity)
+      // }
+      // TODO: Test going beyond bounds of range...
+      this.$emit('change', { value: this.internalValue })
+    }
+  },
+
+  watch: {
+    value (newValue) {
+      // TODO: Sync prop updates to our internal value to allow external value updates
     }
   }
 }

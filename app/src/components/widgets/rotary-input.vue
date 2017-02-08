@@ -67,18 +67,28 @@ export default {
     },
 
     onMousemove (event) {
-      // TODO: PERF
-      // if(this.internalValue !== this.minValue && this.internalValue !== this.maxValue) {
-      this.internalValue += this.valueRange * (-event.movementY / this.sensitivity)
-      // }
-      // TODO: Test going beyond bounds of range...
+      // PERF: Don't update (vue-observed) property, or fire a change event when we're trying to go
+      // beyond a limit, or when we didn't move (since neither will produce a value change)
+      if (
+        !event.movementY ||
+        (this.internalValue === this.minValue && event.movementY > 0) &&
+        (this.internalValue === this.maxValue && event.movementY < 0)
+      ) {
+        return
+      }
+
+      const newValue = this.internalValue + (this.valueRange * (-event.movementY / this.sensitivity))
+
+      // Make sure we only update within our bounds
+      this.internalValue = Math.min(Math.max(newValue, this.minValue), this.maxValue)
+
       this.$emit('change', { value: this.internalValue })
     }
   },
 
   watch: {
     value (newValue) {
-      // TODO: Sync prop updates to our internal value to allow external value updates
+      // TODO: Sync prop updates to our internal value to allow external value updates (TEST!)
     }
   }
 }
